@@ -1,0 +1,36 @@
+{
+  "name": "ktulu-manitou",
+  "version": "0.0.1",
+  "description": "Simple app for GMs of Ktulu game.",
+  "main": "src/server/index.js",
+  "scripts": {
+    "start": "node src/server/index.js",
+    "postinstall": "webpack --config config/webpack.js",
+    "webpack": "webpack --config config/webpack.js",
+    "webpack-watch": "webpack --config config/webpack.js --watch --colors"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/wojtex/ktulu-manitou.git"
+  },
+  "author": "Wojciech Kordalski",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/wojtex/ktulu-manitou/issues"
+  },
+  "homepage": "https://github.com/wojtex/ktulu-manitou",
+  "dependencies": {
+    "debug": "^2.1.3",
+    "express": "^4.12.3",
+    "react": "^0.13.1"
+  },
+  "devDependencies": {
+    "babel": "^5.0.12",
+    "babel-core": "^5.0.12",
+    "babel-loader": "^5.0.0",
+    "flux": "^2.0.3",
+    "immutable": "^3.7.2",
+    "lodash": "^3.8.0",
+    "webpack": "^1.8.4"
+  }
+}
