@@ -58,8 +58,9 @@ class Store extends EventEmitter {
           .update('Started', _ => true)
           .update('LastAction', _ => _this.state);
         // Give characters their unique IDs.
-        for(var i = 0; i < _this.state.get('Characters').size; i++) {
+        for(var i = 0; i < _this.state.Characters.size; i++) {
           _this.state = _this.state.updateIn(['Characters', i, 'UID'], _ => i);
+          if(_this.state.Characters.get(i).ID == 'kurtyzana')
         }
         // Number multi-instance characters.
         var count_dictionary = new Map();

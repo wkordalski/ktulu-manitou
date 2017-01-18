@@ -10,54 +10,59 @@ var CharacterBase = {
     RealName: undefined
 }
 
-var Kurtyzana = Immutable.Record(_.merge({}, CharacterBase, {
-    ID: 'kurtyzana',
-    Name: 'Kurtyzana',
-    Faction: 'miastowy',
-    FactionColor: '#ffff00',
+var Hooker = Immutable.Record(_.merge({}, CharacterBase, {
+  Role: ROLES.HOOKER,
+  Faction: FACTIONS.CITIZENS,
 }))
-var Szeryf = Immutable.Record(_.merge({}, CharacterBase, {
-    ID: 'szeryf',
-    Name: 'Szeryf',
-    Faction: 'miastowy',
-    FactionColor: '#ffff00'
+var Sheriff = Immutable.Record(_.merge({}, CharacterBase, {
+  Role: ROLES.SHERIFF,
+  Faction: FACTIONS.CITIZENS,
 }))
-var Pastor = Immutable.Record(_.merge({}, CharacterBase, {
-    ID: 'pastor',
-    Name: 'Pastor',
-    Faction: 'miastowy',
-    FactionColor: '#ffff00'
+var Parson = Immutable.Record(_.merge({}, CharacterBase, {
+  Role: ROLES.PARSON,
+  Faction: FACTIONS.CITIZENS,
 }))
 
 var Miastowy = Immutable.Record(_.merge({}, CharacterBase, {
-    ID: 'miastowy',
-    Number: -1,
-    Name: 'Zwykły miastowy',
-    Faction: 'miastowy',
-    FactionColor: '#ffff00'
+  // TODO
 }))
 
-var Herszt = Immutable.Record(_.merge({}, CharacterBase, {
-  ID: 'herszt',
-  Name: 'Herszt',
-  Faction: 'bandyta',
-  FactionColor: '#2200aa',
+var Chieftain = Immutable.Record(_.merge({}, CharacterBase, {
+  Role: ROLES.CHIEFTAIN,
+  Faction: FACTIONS.BANDIT,
   Rank: 0                   // Najwyższy rangą
 }))
 
 var CharacterMeta = Immutable.Record({
-  type: undefined,
-  unique: false,
-  name: undefined
+  name: undefined,
+  color: '#000000',
+  show: state => true,
+  adder: state => state
 })
 
 var Characters = Immutable.fromJS([
-    new CharacterMeta({ type: Kurtyzana, name: 'kurtyzana', unique: true }),
-    new CharacterMeta({ type: Szeryf, name: 'szeryf', unique: true }),
-    new CharacterMeta({ type: Pastor, name: 'pastor', unique: true }),
-    new CharacterMeta({ type: Miastowy, name: 'miastowy', unique: false }),
+  new CharacterMeta({ name: 'Kurtyzana', color: '#eedd00',
+      show: state => state.Characters.Hooker == undefined,
+      adder: state => state.updateIn(['Characters', 'Hooker'], _ => new Hooker())
+  }),
+  new CharacterMeta({ name: 'Szeryf', color: '#eedd00',
+      show: state => state.Characters.Sheriff == undefined,
+      adder: state => state.updateIn(['Characters', 'Sheriff'], _ => new Sheriff())
+  }),
+  new CharacterMeta({ name: 'Pastor', color: '#eedd00',
+      show: state => state.Characters.Parson == undefined,
+      adder: state => state.updateIn(['Characters', 'Parson'], _ => new Parson())
+  }),
 
-    new CharacterMeta({ type: Herszt, name: 'herszt', unique: true }),
+  //new CharacterMeta({ type: Miastowy, name: 'miastowy', unique: false }),
+
+  new CharacterMeta({ name: 'Herszt', color: '#2211dd',
+      show: state => state.Characters.Chieftain == undefined,
+      adder: state => state.updateIn(['Characters', 'Chieftain'], _ => new Chieftain())
+  }),
 ])
 
+function get_characters_list(state) {
+  // returns list of characters (name, color, remover)
+}
 export default Characters;

@@ -1,28 +1,47 @@
 import Immutable from 'immutable';
 
+var GameParameters = Immutable.Record({
+  // Day settings...
+  SearchesPerDay: 2,
+  DuelsPerDay: 2,
+
+  // Bandits settings...
+  ShipArrivalTime: 3,
+})
+
+var Factions = Immutable.Record({
+  Citizens: undefined,
+  Bandits: undefined,
+  Indians: undefined,
+})
+
+var Characters = Immutable.Record({
+  Hooker: undefined,
+  Sheriff: undefined,
+  Parson: undefined,
+
+  Chieftain: undefined,
+})
+
 var State = Immutable.Record({
     Started: false, // means setup is running
     Won: undefined, // will contain winning Faction
-    // Day settings...
-    SearchesPerDay: 2,
-    DuelsPerDay: 2,
 
-    // Bandits settings...
-    ShipArrivalTime: 3,
+    //
+    // GAME SETTINGS
+    //
+    Parameters: new GameParameters(),
 
     // Time in game...
     Date: 0,
     IsDay: false,
     Time: 0,
 
-    // Characters...
-    Characters: new Immutable.List(),
-
-    StatuetteOwner: -1,       // czyli kto oficjalnie ma posążek
-    StatuetteHolder: -1,      // jeśli się go zabije, to przejmuje się posążek
-    LockedBySerif: undefined,
-    SerifGotStatuette: false,
-    SpowiadanaByPastor: undefined,
+    //
+    // CHARACTERS
+    //
+    Factions: new Factions(),
+    Characters: new Characters(),
 
     // Time statistics
     LastAction: undefined,
