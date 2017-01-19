@@ -1,0 +1,12 @@
+{
+  "name": "ktulu-manitou",
+  "version": "1.0.0",
+  "description": "Ktulu hosting helper",
+  "main": "index.js",
+  "repository": "git@github.com:wojtex/ktulu-manitou.git",
+  "author": "Wojciech Kordalski <wojtek.kordalski@gmail.com>",
+  "license": "MIT",
+  "dependencies": {
+    "elm": "^0.18.0"
+  }
+}
