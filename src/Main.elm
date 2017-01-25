@@ -65,16 +65,16 @@ sheriff : (State -> State) -> (State -> State)
 
 
 night0 cont =
-  (hooker <| sheriff) cont
+  hooker <| sheriff <| cont
 
 day : (State -> State) -> (State -> State)
 night : (State -> State) -> (State -> State)
 
-daynights : (State -> State) -> (State -> State)
-daynights cont = (day <| night <| daynights) cont
+daynights : (State -> State)
+daynights = \s -> (day <| night <| daynights) s
 
 plot cont =
-  (night0 <| daynights) cont
+  night0 <| daynights <| cont
 
 
 won : Faction -> (State -> State)
