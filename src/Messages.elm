@@ -1,5 +1,7 @@
 module Messages exposing (..)
 
 type Msg
-  = ShowGameSettings
+  = Undo | DropHistory
+  | ShowGameSettings
   | GameSettingsPlayersCount String
+  | CommandClicked Int

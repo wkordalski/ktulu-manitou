@@ -5,7 +5,9 @@ import Html.Attributes as Attrs exposing (..)
 import Html.Events exposing (..)
 
 import Messages
-import State
+import State exposing (State)
+
+import Game exposing (GameState)
 
 init = { players = 12 }
 
@@ -21,9 +23,23 @@ update msg state =
   case msg of
     Messages.GameSettingsPlayersCount s ->
       case String.toInt s of
-        Err _ -> (State.Error "Wrong players count!", Cmd.none)
-        Ok v -> (State.GameSettings { state | players = v}, Cmd.none)
-    _ -> (State.Error "Wrong message!", Cmd.none)
+        Err _ -> State.Error "Wrong players count!"
+        Ok v -> State.GameSettings { state | players = v}
+    _ -> State.Error "Wrong message!"
 
 isValid settings =
   True
+
+{-
+Usually cont will be something like this:
+cont gameState =
+  \s -> (some <| chained <| actions) (State.GameState gameState)
+-}
+{-
+settings : (GameState -> State -> State) -> (State -> State)
+settings cont =
+  \s -> State.GameSettings {
+    players = 12,
+    continuation = cont
+  }
+-}

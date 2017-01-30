@@ -1,5 +1,7 @@
 module State exposing (..)
 
+import Color exposing (Color)
+
 import Game exposing (Player, GameState)
 import Faction exposing (Faction)
 
@@ -8,7 +10,8 @@ type alias GameSettingsData = {
   }
 
 type State
-  = PlayerChoosing
+  = Start
+  | PlayerChoosing
     {
       original : State,
       choices : List Player,
@@ -19,7 +22,18 @@ type State
       cancelEnabled : Bool,
       parent : State
     }
-  | Menu
+  | Message -- text. and buttons horizontally, maby in few rows? (needs: styling)
+    {
+      text : String,
+      buttons : List (String, Color, (State->State)),
+      parent : State
+    }
+  | Menu -- text, and buttons vertically below
+    {
+      text : String,
+      buttons : List (String, Color, (State->State)),
+      parent : State
+    }
   | GameSettings GameSettingsData
   | PlayerSettings GameSettingsData
   | Error String

@@ -6,13 +6,22 @@ Some options of game (ship arrival, who has statuette {Maby player}, who owns st
 -}
 
 import Html exposing (..)
+import Html.Events exposing (..)
 
 import Settings
 import Messages exposing (Msg)
-
-import Menu
+import DialogViews
 
 import State exposing (State)
+
+import Dialogs
+import Color exposing (Color)
+
+import Program exposing (program)
+
+type OutState
+  = History {current : State, previous : OutState }
+  | First {current : State}
 
 main = Html.program {
     init = init,
@@ -23,34 +32,61 @@ main = Html.program {
 
 -- INIT
 
-init : (State, Cmd Msg)
-init = (State.Menu, Cmd.none)
+init : (OutState, Cmd Msg)
+init = (First { current = Program.program <| State.Start }, Cmd.none)
 
 
 -- UPDATE SYSTEM
 
-update : Msg -> State -> (State, Cmd Msg)
-update msg state =
+getCurrentState state =
   case state of
-    State.Menu -> Menu.update msg
-    State.GameSettings s -> Settings.update msg s
+    First  {current} -> current
+    History {current} -> current
+
+update : Msg -> OutState -> (OutState, Cmd Msg)
+update msg state =
+  case msg of
+    Messages.Undo ->
+      case state of
+        History {previous} -> (previous, Cmd.none)
+        First _ -> (state, Cmd.none)
+    Messages.DropHistory -> (First {current = getCurrentState state}, Cmd.none)
+    _ ->
+      let (newState, command) = innerUpdate msg (getCurrentState state) in
+      (History {current = newState, previous = state}, command)
+
+innerUpdate msg state =
+  case state of
+    State.Menu s -> (DialogViews.updateMenu msg s, Cmd.none)
+    State.GameSettings s -> (Settings.update msg s, Cmd.none)
+    State.Message s -> (DialogViews.updateMessage msg s, Cmd.none)
     _ -> (State.Error "Invalid state now!", Cmd.none)
 
 
 -- SUBSCRIPTIONS
 
-subscriptions : State -> Sub Msg
+subscriptions : OutState -> Sub Msg
 subscriptions model =
   Sub.none
 
 
 -- VIEWS
 
-view : State -> Html Msg
-view state =
+global_menu : OutState -> Html Msg -> Html Msg
+global_menu state contents =
   case state of
-    State.Menu -> Menu.view
+    First _ -> contents
+    History _ -> div [] [button [onClick Messages.Undo] [text "Undo"], contents]
+
+view : OutState -> Html Msg
+view state =
+  global_menu state <| innerView <| getCurrentState <| state
+
+innerView state =
+  case state of
+    State.Menu s -> DialogViews.viewMenu s
     State.GameSettings s -> Settings.view s
+    State.Message s -> DialogViews.viewMessage s
     State.Error msg -> div [] [h2 [] [text "Błąd!"], span [] [text msg]]
     _ -> div [] [text "Co ty tutaj robisz?"]
 
@@ -84,5 +120,19 @@ won faction =
 kill : Player -> Player -> (State -> State) -> (State -> State)
 -- killer killee continuation
 -- returns state transformation that kills killee and then does continuation
+
+
+Ideas for "Undo" - which is quite a usefull feature
+
+-- Inside game
+
+checkpoint : (State -> State) ->  (State -> State)
+checkpoint cont =
+  \s -> case s of
+    State.GameState s -> State.GameSettings { s | undo_state = s, undo_cont = cont}
+
+-- Outside game
+"Real" state is extended with pointer to previous state
+state = {current : State.State, previous : state}
 
 -}
