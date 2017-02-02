@@ -2,6 +2,7 @@ module Dialogs exposing (..)
 
 import State exposing (State)
 import Color exposing (Color)
+import Character exposing (Character)
 
 -- Należy wykonać zwracaną wartość (State → State) by pokazać okno
 {-
@@ -28,8 +29,21 @@ message text buttons =
 
 menu : String -> List (String, Color, (State->State)) -> (State -> State)
 menu text buttons =
-  \s -> State.Message {
+  \s -> State.Menu {
     text = text,
     buttons = buttons,
+    parent = s
+  }
+
+character : String -> (Character -> String) -> List Character -> (Character -> State -> State) -> Maybe (State -> State) -> (State -> State)
+character text characterDescriptor characters accept cancel =
+  \s -> State.CharacterDialog {
+    text = text,
+    characterDescriptor = characterDescriptor,
+    characters = characters,
+    contAccept = accept,
+    contCancel = cancel,
+    faction = Nothing,
+    character = Nothing,
     parent = s
   }

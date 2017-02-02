@@ -2,11 +2,19 @@ module State exposing (..)
 
 import Color exposing (Color)
 
+import Character exposing (Character, CharacterContainer)
 import Game exposing (Player, GameState)
 import Faction exposing (Faction)
 
 type alias GameSettingsData = {
-    players : Int
+    playersNo : Int,
+
+    contAccept : (GameState -> State -> State),
+    contCancel : (State -> State),
+
+    gettingPlayers : Bool,
+    players : List Character,
+    characters : CharacterContainer
   }
 
 type State
@@ -34,7 +42,27 @@ type State
       buttons : List (String, Color, (State->State)),
       parent : State
     }
+  | CharacterDialog
+    {
+      text : String,
+      characterDescriptor : Character -> String,
+      characters : List Character,
+      contAccept : Character -> State -> State,
+      contCancel : Maybe (State -> State),
+      faction : Maybe Faction,
+      character : Maybe Character,
+      parent : State
+    }
   | GameSettings GameSettingsData
   | PlayerSettings GameSettingsData
   | Error String
+  | Game GameState
   | Won Faction
+
+gameState state =
+  case state of
+    Game g -> Just g
+    Menu {parent} -> gameState parent
+    Message {parent} -> gameState parent
+    CharacterDialog {parent} -> gameState parent
+    _ -> Nothing

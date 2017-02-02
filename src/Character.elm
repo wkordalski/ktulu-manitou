@@ -14,6 +14,22 @@ type alias CharacterContainer = {
   sheriff : Maybe Int
 }
 
+makeContainer =
+  {
+    hooker = Nothing,
+    sheriff = Nothing
+  }
+
+hooker player =
+  Hooker { player = player }
+
+sheriff player =
+  Sheriff { player = player }
+
+addCharacterToContainer container character =
+  case character of
+    Hooker h -> { container | hooker = Just h.player }
+    Sheriff s -> { container | sheriff = Just s.player }
 
 name : Character -> String
 name character =
