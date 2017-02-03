@@ -16,7 +16,7 @@ buttonFromDescription (text, color, cont) id =
   button
     [style [("color", colorToHex color)]
     , onClick (Messages.CommandClicked id)]
-    [Html.text text]
+    [text]
 
 updateMessage msg {buttons, parent} =
   case msg of
@@ -28,7 +28,7 @@ updateMessage msg {buttons, parent} =
 
 viewMessage {text, buttons} =
   div []
-  ( (h2 [] [Html.text text]) ::
+  ( (h2 [] [text]) ::
   (List.indexedMap (\i d -> buttonFromDescription d i) buttons) )
 
 updateMenu msg {buttons, parent} =
@@ -42,7 +42,7 @@ updateMenu msg {buttons, parent} =
 -- TODO: more styling - options one above another
 viewMenu {text, buttons} =
   div []
-  ( (h2 [] [Html.text text]) ::
+  ( (h2 [] [text]) ::
   (List.indexedMap (\i d -> buttonFromDescription d i) buttons) )
 
 
@@ -57,18 +57,18 @@ viewCharacterDialog {text, characterDescriptor, characters, faction, character, 
       let (desc, enable) = characterDescriptor ch parent
       in
       div []
-        [ div [] [Html.text text]
-        , div [] [Html.text desc]
+        [ div [] [text]
+        , div [] [desc]
         , button [onClick Messages.CharacterDialogBackButton] [Html.text "Back"]
         , button [onClick Messages.CharacterDialogOKButton] [Html.text "OK"]
         ]
     (Just fc, Nothing) -> div [] (
-      ( (div [] [Html.text text]) ::
+      ( (div [] [text]) ::
         List.map displayCharacter (Character.filterByFaction fc characters)
       ) ++
       [ button [onClick Messages.CharacterDialogBackButton] [Html.text "Back"] ])
     (Nothing, Nothing) -> div [] (
-      ( (div [] [Html.text text]) ::
+      ( (div [] [text]) ::
         List.map displayFaction (Character.factions characters)
       )
       ++
@@ -115,20 +115,20 @@ viewPlayerDialog state =
       let playerId = d1 * 10 + d2 in
       let (desc, enable) = playerDescriptor playerId parent in
       div []
-      [ div [] [Html.text text]
-      , div [] [Html.text desc]
+      [ div [] [text]
+      , div [] [desc]
       , button [onClick Messages.PlayerDialogBackButton] [Html.text "Back"]
       , button [onClick Messages.PlayerDialogOKButton, disabled (not enable)] [Html.text "OK"]
       ]
     (Just d1, Nothing) ->
       div []
-      [ div [] [Html.text text]
+      [ div [] [text]
       , makeKeyboard (List.filter (\x -> x // 10 == d1) players) (\x -> x % 10) (\x -> Messages.PlayerDialogSetDigit2 x)
       , button [onClick Messages.PlayerDialogBackButton] [Html.text "Back"]
       ]
     (Nothing, _) ->
       div [] (
-      [ div [] [Html.text text]
+      [ div [] [text]
       , makeKeyboard players (\x -> x // 10) (\x -> Messages.PlayerDialogSetDigit1 x)
       ] ++
       case contCancel of

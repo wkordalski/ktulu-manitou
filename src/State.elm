@@ -6,6 +6,9 @@ import Character exposing (Character, CharacterContainer)
 import Game exposing (Player, GameState)
 import Faction exposing (Faction)
 
+import Html exposing (Html)
+import Messages exposing (Msg)
+
 type alias GameSettingsData = {
     playersNo : Int,
 
@@ -32,20 +35,20 @@ type State
     }
   | Message -- text. and buttons horizontally, maby in few rows? (needs: styling)
     {
-      text : String,
-      buttons : List (String, Color, (State->State)),
+      text : Html Msg,
+      buttons : List (Html Msg, Color, (State->State)),
       parent : State
     }
   | Menu -- text, and buttons vertically below
     {
-      text : String,
-      buttons : List (String, Color, (State->State)),
+      text : Html Msg,
+      buttons : List (Html Msg, Color, (State->State)),
       parent : State
     }
   | CharacterDialog
     {
-      text : String,
-      characterDescriptor : Character -> State -> (String, Bool),
+      text : Html Msg,
+      characterDescriptor : Character -> State -> (Html Msg, Bool),
       characters : List Character,
       contAccept : Character -> State -> State,
       contCancel : Maybe (State -> State),
@@ -55,8 +58,8 @@ type State
     }
   | PlayerDialog
     {
-      text : String,
-      playerDescriptor : Player -> State -> (String, Bool),
+      text : Html Msg,
+      playerDescriptor : Player -> State -> (Html Msg, Bool),
       players : List Player,
       contAccept : Player -> Action,
       contCancel : Maybe Action,

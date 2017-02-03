@@ -4,6 +4,9 @@ import State exposing (State)
 import Color exposing (Color)
 import Character exposing (Character)
 import Game exposing (Player)
+import Messages exposing (Msg)
+
+import Html exposing (Html)
 
 -- Należy wykonać zwracaną wartość (State → State) by pokazać okno
 {-
@@ -20,7 +23,7 @@ playerChooser choices title cancelEnabled cont =
   }
 -}
 
-message : String -> List (String, Color, (State->State)) -> (State -> State)
+message : Html Msg -> List (Html Msg, Color, (State->State)) -> (State -> State)
 message text buttons =
   \s -> State.Message {
     text = text,
@@ -28,7 +31,7 @@ message text buttons =
     parent = s
   }
 
-menu : String -> List (String, Color, (State->State)) -> (State -> State)
+menu : Html Msg -> List (Html Msg, Color, (State->State)) -> (State -> State)
 menu text buttons =
   \s -> State.Menu {
     text = text,
@@ -36,7 +39,7 @@ menu text buttons =
     parent = s
   }
 
-character : String -> (Character -> State -> (String, Bool)) -> List Character -> (Character -> State -> State) -> Maybe (State -> State) -> (State -> State)
+character : Html Msg -> (Character -> State -> (Html Msg, Bool)) -> List Character -> (Character -> State -> State) -> Maybe (State -> State) -> (State -> State)
 character text characterDescriptor characters accept cancel =
   \s -> State.CharacterDialog {
     text = text,
@@ -49,7 +52,7 @@ character text characterDescriptor characters accept cancel =
     parent = s
   }
 
-player : String -> (Player -> State -> (String, Bool)) -> List Player -> (Player -> State -> State) -> Maybe (State -> State) -> (State -> State)
+player : Html Msg -> (Player -> State -> (Html Msg, Bool)) -> List Player -> (Player -> State -> State) -> Maybe (State -> State) -> (State -> State)
 player text playerDescriptor players accept cancel =
   \s -> State.PlayerDialog {
     text = text,

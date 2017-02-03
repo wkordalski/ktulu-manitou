@@ -38,8 +38,8 @@ chooseCharacterForPlayer cont =
       State.GameSettings data ->
         let players_cnt = List.length data.players
         in
-        Dialogs.character "Choose"
-          (\ch -> \s -> (Character.name ch, True))
+        Dialogs.character (Html.text "Choose")
+          (\ch -> \s -> (Html.text <| Character.name ch, True))
           (getUnusedCharacters players_cnt data)
           (\ch -> \s -> cont <| State.GameSettings { data | players = ch :: data.players, characters = Character.addCharacterToContainer data.characters ch })
           Nothing s
