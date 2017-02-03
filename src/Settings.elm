@@ -38,10 +38,11 @@ chooseCharacterForPlayer cont =
       State.GameSettings data ->
         let players_cnt = List.length data.players
         in
-        Dialogs.character "Choose" Character.name
-        (getUnusedCharacters players_cnt data)
-        (\ch -> \s -> cont <| State.GameSettings { data | players = ch :: data.players, characters = Character.addCharacterToContainer data.characters ch })
-        Nothing s
+        Dialogs.character "Choose"
+          (\ch -> \s -> (Character.name ch, True))
+          (getUnusedCharacters players_cnt data)
+          (\ch -> \s -> cont <| State.GameSettings { data | players = ch :: data.players, characters = Character.addCharacterToContainer data.characters ch })
+          Nothing s
       _ -> State.Error "Wrong state..."
 
 view state =

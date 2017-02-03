@@ -1,6 +1,7 @@
 module Character exposing (..)
 
 import Faction exposing (Faction)
+import Utils exposing (unique, compareBy)
 
 type alias CharacterBase a = { a | player : Int }
 
@@ -54,13 +55,7 @@ faction character =
 
 factions : List Character -> List Faction
 factions characters =
-  let factionList = List.sortBy Faction.order (List.map faction characters)
-  in let unique l a =
-    case (l, a) of
-      ([], _) -> a
-      (h::t, []) -> unique t [h]
-      (h::t, c::_) -> unique t (if h == c then a else h::a)
-  in unique factionList []
+  unique (compareBy Faction.order) (List.map faction characters)
 
 
 filterByFaction : Faction -> List Character -> List Character

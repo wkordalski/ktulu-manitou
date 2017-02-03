@@ -61,6 +61,7 @@ innerUpdate msg state =
     State.GameSettings s -> (Settings.update msg s, Cmd.none)
     State.Message s -> (DialogViews.updateMessage msg s, Cmd.none)
     State.CharacterDialog s -> (DialogViews.updateCharacterDialog msg s, Cmd.none)
+    State.PlayerDialog s -> (DialogViews.updatePlayerDialog msg s, Cmd.none)
     _ -> (State.Error "Invalid state now!", Cmd.none)
 
 
@@ -89,6 +90,7 @@ innerView state =
     State.GameSettings s -> Settings.view s
     State.Message s -> DialogViews.viewMessage s
     State.CharacterDialog s -> DialogViews.viewCharacterDialog s
+    State.PlayerDialog s -> DialogViews.viewPlayerDialog s
     State.Error msg -> div [] [h2 [] [text "Błąd!"], span [] [text msg]]
     _ -> div [] [text "Co ty tutaj robisz?"]
 

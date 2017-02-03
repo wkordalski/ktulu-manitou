@@ -12,6 +12,6 @@ program : State -> State
 program =
   \s -> menu "Hello in my game :)"
     [ ("Play the game", Color.black,
-        settings (\gs -> error "Accepted...") program)
+        settings (\gs -> player "Some text" (\p -> \s -> (Basics.toString p, p%2==1)) [1,2,3] (\p -> error "Chosen") Nothing) program)
     , ("About authors", Color.green,
         message "Me and you" [("OK", Color.red, program)])] s

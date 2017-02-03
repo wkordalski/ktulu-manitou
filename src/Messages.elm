@@ -17,3 +17,8 @@ type Msg
   | CharacterDialogBackButton
   | CharacterDialogSetFaction Faction
   | CharacterDialogSetCharacter Character
+  -- CHOOSE PLAYER DIALOG --
+  | PlayerDialogOKButton
+  | PlayerDialogBackButton
+  | PlayerDialogSetDigit1 Int
+  | PlayerDialogSetDigit2 Int

@@ -45,7 +45,7 @@ type State
   | CharacterDialog
     {
       text : String,
-      characterDescriptor : Character -> String,
+      characterDescriptor : Character -> State -> (String, Bool),
       characters : List Character,
       contAccept : Character -> State -> State,
       contCancel : Maybe (State -> State),
@@ -53,11 +53,24 @@ type State
       character : Maybe Character,
       parent : State
     }
+  | PlayerDialog
+    {
+      text : String,
+      playerDescriptor : Player -> State -> (String, Bool),
+      players : List Player,
+      contAccept : Player -> Action,
+      contCancel : Maybe Action,
+      digit1 : Maybe Int,
+      digit2 : Maybe Int,
+      parent : State
+    }
   | GameSettings GameSettingsData
   | PlayerSettings GameSettingsData
   | Error String
   | Game GameState
   | Won Faction
+
+type alias Action = State -> State
 
 gameState state =
   case state of
