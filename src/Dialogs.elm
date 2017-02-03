@@ -39,12 +39,12 @@ menu text buttons =
     parent = s
   }
 
-character : Html Msg -> (Character -> State -> (Html Msg, Bool)) -> List Character -> (Character -> State -> State) -> Maybe (State -> State) -> (State -> State)
+character : Html Msg -> (Character -> State -> (Html Msg, Bool)) -> (State -> List Character) -> (Character -> State -> State) -> Maybe (State -> State) -> (State -> State)
 character text characterDescriptor characters accept cancel =
   \s -> State.CharacterDialog {
     text = text,
     characterDescriptor = characterDescriptor,
-    characters = characters,
+    characters = characters s,
     contAccept = accept,
     contCancel = cancel,
     faction = Nothing,
@@ -52,12 +52,12 @@ character text characterDescriptor characters accept cancel =
     parent = s
   }
 
-player : Html Msg -> (Player -> State -> (Html Msg, Bool)) -> List Player -> (Player -> State -> State) -> Maybe (State -> State) -> (State -> State)
+player : Html Msg -> (Player -> State -> (Html Msg, Bool)) -> (State -> List Player) -> (Player -> State -> State) -> Maybe (State -> State) -> (State -> State)
 player text playerDescriptor players accept cancel =
   \s -> State.PlayerDialog {
     text = text,
     playerDescriptor = playerDescriptor,
-    players = players,
+    players = players s,
     contAccept = accept,
     contCancel = cancel,
     digit1 = Nothing,

@@ -22,8 +22,17 @@ settings accept cancel =
     characters = Character.makeContainer
   }
 
-makeGameState : State.GameSettingsData -> GameState
-makeGameState state = {}
+makeGameState : State -> Result () GameState
+makeGameState state =
+  case state of
+    State.GameSettings s ->
+      Ok {
+        players = List.reverse s.players,
+        characters = s.characters,
+        playersNo = List.length s.players
+        -- TODO: other fields
+      }
+    _ -> Err ()
 
 getUnusedCharacters : Int -> State.GameSettingsData -> List Character
 getUnusedCharacters player {characters} =
@@ -38,10 +47,14 @@ chooseCharacterForPlayer cont =
       State.GameSettings data ->
         let players_cnt = List.length data.players
         in
-        Dialogs.character (Html.text "Choose")
+        Dialogs.character (Html.text ("Choose player " ++ (Basics.toString players_cnt)))
           (\ch -> \s -> (Html.text <| Character.name ch, True))
-          (getUnusedCharacters players_cnt data)
-          (\ch -> \s -> cont <| State.GameSettings { data | players = ch :: data.players, characters = Character.addCharacterToContainer data.characters ch })
+          (\s -> getUnusedCharacters players_cnt data)
+          (\ch -> \s ->
+            case s of
+              State.GameSettings st -> cont <| State.GameSettings { st | players = ch :: st.players, characters = Character.addCharacterToContainer st.characters ch }
+              _ -> State.Error "Wrong state..."
+          )
           Nothing s
       _ -> State.Error "Wrong state..."
 
@@ -62,9 +75,16 @@ update msg state =
         Err _ -> State.Error "Wrong players count!"
         Ok v -> State.GameSettings { state | playersNo = v }
     Messages.GameSettingsSetPlayers ->
-      let {contAccept, playersNo} = state in
-      (List.foldr (\a -> \b -> chooseCharacterForPlayer <| b) (\s -> contAccept (makeGameState state) s) (List.repeat playersNo 0) )
-          (State.GameSettings state)
+      let {contAccept, contCancel, playersNo} = state in
+      (List.foldr (\a -> \b -> chooseCharacterForPlayer <| b)
+        (\s ->
+          case makeGameState s of
+            Ok gs -> contAccept gs s
+            Err () -> contCancel s
+        )
+        (List.range 0 (playersNo-1))
+      )
+      (State.GameSettings state)
     _ -> State.Error "Wrong message!"
 
 isValid settings =

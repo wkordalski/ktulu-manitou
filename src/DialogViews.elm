@@ -64,6 +64,7 @@ viewCharacterDialog {text, characterDescriptor, characters, faction, character, 
         ]
     (Just fc, Nothing) -> div [] (
       ( (div [] [text]) ::
+        (div [] [Html.text ("«" ++ (Faction.name fc) ++ "»")]) ::
         List.map displayCharacter (Character.filterByFaction fc characters)
       ) ++
       [ button [onClick Messages.CharacterDialogBackButton] [Html.text "Back"] ])
@@ -116,6 +117,7 @@ viewPlayerDialog state =
       let (desc, enable) = playerDescriptor playerId parent in
       div []
       [ div [] [text]
+      , div [] [Html.text ((toString d1) ++ (toString d2))]
       , div [] [desc]
       , button [onClick Messages.PlayerDialogBackButton] [Html.text "Back"]
       , button [onClick Messages.PlayerDialogOKButton, disabled (not enable)] [Html.text "OK"]
@@ -123,12 +125,14 @@ viewPlayerDialog state =
     (Just d1, Nothing) ->
       div []
       [ div [] [text]
+      , div [] [Html.text ((toString d1) ++ "*")]
       , makeKeyboard (List.filter (\x -> x // 10 == d1) players) (\x -> x % 10) (\x -> Messages.PlayerDialogSetDigit2 x)
       , button [onClick Messages.PlayerDialogBackButton] [Html.text "Back"]
       ]
     (Nothing, _) ->
       div [] (
       [ div [] [text]
+      , div [] [Html.text "**"]
       , makeKeyboard players (\x -> x // 10) (\x -> Messages.PlayerDialogSetDigit1 x)
       ] ++
       case contCancel of

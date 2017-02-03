@@ -6,6 +6,7 @@ type alias Player = Int
 
 type alias GameState =
   {
-    --players : List Character,
-    --characters : CharacterContainer
+    players : List Character,
+    characters : CharacterContainer,
+    playersNo : Int
   }
