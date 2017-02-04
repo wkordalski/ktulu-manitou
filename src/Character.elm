@@ -61,3 +61,9 @@ factions characters =
 filterByFaction : Faction -> List Character -> List Character
 filterByFaction fac characters =
   List.filter (\c -> fac == faction c) characters
+
+
+getPlayer ch =
+  case ch of
+    Hooker h -> h.player
+    Sheriff s -> s.player

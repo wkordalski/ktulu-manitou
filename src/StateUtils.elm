@@ -1,7 +1,13 @@
 module StateUtils exposing (..)
 
-displayPlayer : Game.State -> Game.Player -> Result String (Html Msg)
+import Character
+import Game
+import Html exposing (Html)
+import Messages exposing (Msg)
+import Utils exposing (nth)
+
+displayPlayer : Game.State -> Game.Player -> (Html Msg)
 displayPlayer s p =
   case nth s.players p of
-    Just ch -> Html.text ((toString ch.player) ++ ". " + (Character.name ch))
-    Nothing -> Err "Such player does not exist"
+    Just ch -> Html.text ((toString <| Character.getPlayer ch) ++ ". " ++ (Character.name ch))
+    Nothing -> Html.text "«nie istnieje»"
