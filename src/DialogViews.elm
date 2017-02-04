@@ -12,18 +12,16 @@ import Faction exposing (Faction)
 import Utils exposing (nth, unique)
 import Game
 
-buttonFromDescription (text, color, cont) id =
-  button
-    [style [("color", colorToHex color)]
-    , onClick (Messages.CommandClicked id)]
-    [text]
+--buttonFromDescription : (Html Msg, data -> State) -> Int -> (data -> State)
+buttonFromDescription (text, cont) id =
+  button [onClick (Messages.CommandClicked id)] [text]
 
-updateMessage msg {buttons, parent} =
+updateMessage ctor msg {buttons, data} =
   case msg of
     Messages.CommandClicked i ->
         case nth buttons i of
           Nothing -> State.Error "Invalid button ID!!!"
-          Just (text, color, cont) -> cont parent
+          Just (text, cont) -> cont data
     _ -> State.Error "Invalid message"
 
 viewMessage {text, buttons} =
@@ -31,12 +29,12 @@ viewMessage {text, buttons} =
   ( (h2 [] [text]) ::
   (List.indexedMap (\i d -> buttonFromDescription d i) buttons) )
 
-updateMenu msg {buttons, parent} =
+updateMenu ctor msg {buttons, data} =
   case msg of
     Messages.CommandClicked i ->
         case nth buttons i of
           Nothing -> State.Error "Invalid button ID!!!"
-          Just (text, color, cont) -> cont parent
+          Just (text, cont) -> cont data
     _ -> State.Error "Invalid message"
 
 -- TODO: more styling - options one above another
@@ -46,7 +44,7 @@ viewMenu {text, buttons} =
   (List.indexedMap (\i d -> buttonFromDescription d i) buttons) )
 
 
-viewCharacterDialog {text, characterDescriptor, characters, faction, character, contCancel, parent} =
+viewCharacterDialog {text, characterDescriptor, characters, faction, character, contCancel, data} =
   let displayCharacter ch =
     button [onClick (Messages.CharacterDialogSetCharacter ch)] [Html.text (Character.name ch)]
   in let displayFaction fc =
@@ -54,7 +52,7 @@ viewCharacterDialog {text, characterDescriptor, characters, faction, character, 
   in
   case (faction, character) of
     (_, Just ch) ->
-      let (desc, enable) = characterDescriptor ch parent
+      let (desc, enable) = characterDescriptor ch data
       in
       div []
         [ div [] [text]
@@ -79,24 +77,24 @@ viewCharacterDialog {text, characterDescriptor, characters, faction, character, 
         Nothing -> []
       ))
 
-updateCharacterDialog msg state =
-  let {text, characterDescriptor, characters, faction, character, contAccept, contCancel, parent} = state
+updateCharacterDialog ctor msg state =
+  let {text, characterDescriptor, characters, faction, character, contAccept, contCancel, data} = state
   in
   case msg of
     Messages.CharacterDialogOKButton ->
       case character of
-        Just ch -> contAccept ch parent
+        Just ch -> contAccept ch data
         Nothing -> State.Error "No character selected!!!"
     Messages.CharacterDialogBackButton ->
       case (faction, character) of
-        (_, Just _) -> State.CharacterDialog { state | character = Nothing }
-        (Just _, Nothing) -> State.CharacterDialog { state | faction = Nothing }
+        (_, Just _) -> ctor (State.CharacterDialog { state | character = Nothing })
+        (Just _, Nothing) -> ctor (State.CharacterDialog { state | faction = Nothing })
         (Nothing, Nothing) ->
           case contCancel of
-            Just cont -> cont parent
+            Just cont -> cont data
             _ -> State.Error "This shouldn't be done!"
-    Messages.CharacterDialogSetFaction fc -> State.CharacterDialog { state | faction = Just fc }
-    Messages.CharacterDialogSetCharacter ch -> State.CharacterDialog { state | character = Just ch }
+    Messages.CharacterDialogSetFaction fc -> ctor (State.CharacterDialog { state | faction = Just fc })
+    Messages.CharacterDialogSetCharacter ch -> ctor (State.CharacterDialog { state | character = Just ch })
     _ -> State.Error "Shouldn't happen"
 
 
@@ -109,12 +107,12 @@ makeKeyboard values mapper digitSetter =
   div [] (List.map make_button [1, 2, 3, 4, 5, 6, 7, 8, 9, 0])
 
 viewPlayerDialog state =
-  let {text, playerDescriptor, players, digit1, digit2, contCancel, parent} = state
+  let {text, playerDescriptor, players, digit1, digit2, contCancel, data} = state
   in
   case (digit1, digit2) of
     (Just d1, Just d2) ->
       let playerId = d1 * 10 + d2 in
-      let (desc, enable) = playerDescriptor playerId parent in
+      let (desc, enable) = playerDescriptor playerId data in
       div []
       [ div [] [text]
       , div [] [Html.text ((toString d1) ++ (toString d2))]
@@ -140,22 +138,22 @@ viewPlayerDialog state =
         Just _ -> [button [onClick Messages.PlayerDialogBackButton] [Html.text "Back"]]
       )
 
-updatePlayerDialog msg state =
-  let {playerDescriptor, players, digit1, digit2, contAccept, contCancel, parent} = state
+updatePlayerDialog ctor msg state =
+  let {playerDescriptor, players, digit1, digit2, contAccept, contCancel, data} = state
   in
   case msg of
     Messages.PlayerDialogOKButton ->
       case (digit1, digit2) of
-        (Just d1, Just d2) -> contAccept (d1 * 10 + d2) parent
+        (Just d1, Just d2) -> contAccept (d1 * 10 + d2) data
         _ -> State.Error "No player selected!!!"
     Messages.PlayerDialogBackButton ->
       case (digit1, digit2) of
-        (_, Just _) -> State.PlayerDialog { state | digit2 = Nothing }
-        (Just _, Nothing) -> State.PlayerDialog { state | digit1 = Nothing }
+        (_, Just _) -> ctor (State.PlayerDialog { state | digit2 = Nothing })
+        (Just _, Nothing) -> ctor (State.PlayerDialog { state | digit1 = Nothing })
         (Nothing, Nothing) ->
           case contCancel of
-            Just cont -> cont parent
+            Just cont -> cont data
             _ -> State.Error "This shouldn't be done!"
-    Messages.PlayerDialogSetDigit1 v -> State.PlayerDialog { state | digit1 = Just v }
-    Messages.PlayerDialogSetDigit2 v -> State.PlayerDialog { state | digit2 = Just v }
+    Messages.PlayerDialogSetDigit1 v -> ctor (State.PlayerDialog { state | digit1 = Just v })
+    Messages.PlayerDialogSetDigit2 v -> ctor (State.PlayerDialog { state | digit2 = Just v })
     _ -> State.Error "Shouldn't happen"

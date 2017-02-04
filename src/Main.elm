@@ -33,7 +33,7 @@ main = Html.program {
 -- INIT
 
 init : (OutState, Cmd Msg)
-init = (First { current = Program.program <| State.Start }, Cmd.none)
+init = (First { current = Program.program () }, Cmd.none)
 
 
 -- UPDATE SYSTEM
@@ -52,18 +52,30 @@ update msg state =
         First _ -> (state, Cmd.none)
     Messages.DropHistory -> (First {current = getCurrentState state}, Cmd.none)
     _ ->
-      let (newState, command) = innerUpdate msg (getCurrentState state) in
+      let (newState, command) = updateGeneral msg (getCurrentState state) in
       (History {current = newState, previous = state}, command)
 
-innerUpdate msg state =
+updateGeneral : Msg -> State -> (State, Cmd Msg)
+updateGeneral msg state =
   case state of
-    State.Menu s -> (DialogViews.updateMenu msg s, Cmd.none)
-    State.GameSettings s -> (Settings.update msg s, Cmd.none)
-    State.Message s -> (DialogViews.updateMessage msg s, Cmd.none)
-    State.CharacterDialog s -> (DialogViews.updateCharacterDialog msg s, Cmd.none)
-    State.PlayerDialog s -> (DialogViews.updatePlayerDialog msg s, Cmd.none)
+    State.Start s -> updateDialog (State.Start) msg s
+    State.Settings s -> updateDialogWithSettings (State.Settings) msg s
+    State.Game s -> updateDialog (State.Game) msg s
+    _ -> (state, Cmd.none)
+
+--updateDialog : (State.DialogState data -> State.State) -> Msg -> (State.DialogState data) -> (State.State, Cmd Msg)
+updateDialog ctor msg state =
+  case state of
+    State.MenuDialog s -> (DialogViews.updateMenu ctor msg s, Cmd.none)
+    State.MessageDialog s -> (DialogViews.updateMessage ctor msg s, Cmd.none)
+    State.CharacterDialog s -> (DialogViews.updateCharacterDialog ctor msg s, Cmd.none)
+    State.PlayerDialog s -> (DialogViews.updatePlayerDialog ctor msg s, Cmd.none)
     _ -> (State.Error "Invalid state now!", Cmd.none)
 
+updateDialogWithSettings ctor msg state =
+  case state of
+    State.GameSettings s -> (Settings.update ctor msg s, Cmd.none)
+    _ -> updateDialog ctor msg state
 
 -- SUBSCRIPTIONS
 
@@ -82,19 +94,27 @@ global_menu state contents =
 
 view : OutState -> Html Msg
 view state =
-  global_menu state <| innerView <| getCurrentState <| state
+  global_menu state <| viewGeneral <| getCurrentState <| state
 
-innerView state =
+viewGeneral state =
   case state of
-    State.Menu s -> DialogViews.viewMenu s
-    State.GameSettings s -> Settings.view s
-    State.Message s -> DialogViews.viewMessage s
+    State.Start s -> viewDialog s
+    State.Settings s -> viewDialogWithSettings s
+    State.Game s -> viewDialog s
+    State.Error msg -> div [] [h2 [] [text "Błąd!"], span [] [text msg]]
+
+viewDialog state =
+  case state of
+    State.MenuDialog s -> DialogViews.viewMenu s
+    State.MessageDialog s -> DialogViews.viewMessage s
     State.CharacterDialog s -> DialogViews.viewCharacterDialog s
     State.PlayerDialog s -> DialogViews.viewPlayerDialog s
-    State.Error msg -> div [] [h2 [] [text "Błąd!"], span [] [text msg]]
     _ -> div [] [text "Co ty tutaj robisz?"]
 
-
+viewDialogWithSettings state =
+  case state of
+    State.GameSettings s -> Settings.view s
+    _ -> viewDialog state
 
 {-
 

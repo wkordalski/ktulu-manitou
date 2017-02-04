@@ -1,6 +1,6 @@
 module Dialogs exposing (..)
 
-import State exposing (State)
+import State exposing (State, DialogState)
 import Color exposing (Color)
 import Character exposing (Character)
 import Game exposing (Player)
@@ -9,39 +9,26 @@ import Messages exposing (Msg)
 import Html exposing (Html)
 
 -- Należy wykonać zwracaną wartość (State → State) by pokazać okno
-{-
-playerChooser : List Player -> String -> Bool -> (Maybe Player -> State -> State) -> (State -> State)
-playerChooser choices title cancelEnabled cont =
-  \s -> PlayerChoosing {
-    original = s,
-    continuation = cont,
-    firstDigit = Nothing,
-    secondDigit = Nothing,
-    choices = players,
-    title = title,
-    cancelEnabled = cancelEnabled
-  }
--}
 
-message : Html Msg -> List (Html Msg, Color, (State->State)) -> (State -> State)
-message text buttons =
-  \s -> State.Message {
+message : (DialogState data -> State) -> Html Msg -> List (Html Msg, (data->State)) -> (data->State)
+message ctor text buttons =
+  \s -> ctor (State.MessageDialog {
     text = text,
     buttons = buttons,
-    parent = s
-  }
+    data = s
+  })
 
-menu : Html Msg -> List (Html Msg, Color, (State->State)) -> (State -> State)
-menu text buttons =
-  \s -> State.Menu {
+menu : (DialogState data -> State) -> Html Msg -> List (Html Msg, (data->State)) -> (data->State)
+menu ctor text buttons =
+  \s -> ctor (State.MenuDialog {
     text = text,
     buttons = buttons,
-    parent = s
-  }
+    data = s
+  })
 
-character : Html Msg -> (Character -> State -> (Html Msg, Bool)) -> (State -> List Character) -> (Character -> State -> State) -> Maybe (State -> State) -> (State -> State)
-character text characterDescriptor characters accept cancel =
-  \s -> State.CharacterDialog {
+character : (DialogState data -> State) -> Html Msg -> (Character->data->(Html Msg, Bool)) -> (data->List Character) -> (Character->data->State) -> Maybe (data->State) -> (data->State)
+character ctor text characterDescriptor characters accept cancel =
+  \s -> ctor (State.CharacterDialog {
     text = text,
     characterDescriptor = characterDescriptor,
     characters = characters s,
@@ -49,12 +36,12 @@ character text characterDescriptor characters accept cancel =
     contCancel = cancel,
     faction = Nothing,
     character = Nothing,
-    parent = s
-  }
+    data = s
+  })
 
-player : Html Msg -> (Player -> State -> (Html Msg, Bool)) -> (State -> List Player) -> (Player -> State -> State) -> Maybe (State -> State) -> (State -> State)
-player text playerDescriptor players accept cancel =
-  \s -> State.PlayerDialog {
+player : (DialogState data -> State) -> Html Msg -> (Player->data->(Html Msg, Bool)) -> (data->List Player) -> (Player->data->State) -> Maybe (data->State) -> (data->State)
+player ctor text playerDescriptor players accept cancel =
+  \s -> ctor (State.PlayerDialog {
     text = text,
     playerDescriptor = playerDescriptor,
     players = players s,
@@ -62,5 +49,5 @@ player text playerDescriptor players accept cancel =
     contCancel = cancel,
     digit1 = Nothing,
     digit2 = Nothing,
-    parent = s
-  }
+    data = s
+  })

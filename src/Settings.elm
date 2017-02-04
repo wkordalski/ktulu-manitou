@@ -4,59 +4,53 @@ import Html exposing (..)
 import Html.Attributes as Attrs exposing (..)
 import Html.Events exposing (..)
 
-import Messages
-import State exposing (State)
+import Messages exposing (Msg)
+import State exposing (State, GameSettingsData)
 
 import Dialogs
-import Game exposing (GameState)
+import Game as G
 import Character exposing (Character)
 
-settings : (GameState -> State -> State) -> (State -> State) -> (State -> State)
-settings accept cancel =
-  \s -> State.GameSettings {
+settings : (State.DialogState () -> State) -> (G.State -> State) -> (() -> State) -> (() -> State)
+settings ctor accept cancel =
+  \s -> State.Settings (State.GameSettings {
     playersNo = 12,
     gettingPlayers = False,
     contAccept = accept,
     contCancel = cancel,
     players = [],
     characters = Character.makeContainer
+  })
+
+makeGameState : GameSettingsData -> G.State
+makeGameState s =
+  {
+    players = List.reverse s.players,
+    characters = s.characters,
+    playersNo = List.length s.players
+    -- TODO: other fields
   }
 
-makeGameState : State -> Result () GameState
-makeGameState state =
-  case state of
-    State.GameSettings s ->
-      Ok {
-        players = List.reverse s.players,
-        characters = s.characters,
-        playersNo = List.length s.players
-        -- TODO: other fields
-      }
-    _ -> Err ()
-
-getUnusedCharacters : Int -> State.GameSettingsData -> List Character
+getUnusedCharacters : Int -> GameSettingsData -> List Character
 getUnusedCharacters player {characters} =
   let l1 = []
   in let l2 = if characters.hooker == Nothing then (Character.hooker player) :: l1 else l1
   in let l3 = if characters.sheriff == Nothing then (Character.sheriff player) :: l2 else l2
   in l3
 
+chooseCharacterForPlayer : (GameSettingsData -> State) -> (GameSettingsData -> State)
 chooseCharacterForPlayer cont =
   \s ->
-    case s of
-      State.GameSettings data ->
-        let players_cnt = List.length data.players
+        let players_cnt = List.length s.players
         in
-        Dialogs.character (Html.text ("Choose player " ++ (Basics.toString players_cnt)))
+        Dialogs.character (State.Settings) (Html.text ("Choose player " ++ (Basics.toString players_cnt)))
           (\ch -> \s -> (Html.text <| Character.name ch, True))
-          (\s -> getUnusedCharacters players_cnt data)
+          (\s -> getUnusedCharacters players_cnt s)
           (\ch -> \s ->
-            case s of
-              State.GameSettings st -> cont <| State.GameSettings { st | players = ch :: st.players, characters = Character.addCharacterToContainer st.characters ch }
-              _ -> State.Error "Wrong state..."
+            cont <| { s | players = ch :: s.players, characters = Character.addCharacterToContainer s.characters ch }
           )
           Nothing s
-      _ -> State.Error "Wrong state..."
+
 
 view state =
   let {playersNo} = state
@@ -68,23 +62,20 @@ view state =
     ]
 
 
-update msg state =
+update : (State.DialogState GameSettingsData -> State) -> Msg -> GameSettingsData -> State
+update ctor msg state =
   case msg of
     Messages.GameSettingsPlayersCount s ->
       case String.toInt s of
         Err _ -> State.Error "Wrong players count!"
-        Ok v -> State.GameSettings { state | playersNo = v }
+        Ok v -> ctor (State.GameSettings { state | playersNo = v })
     Messages.GameSettingsSetPlayers ->
       let {contAccept, contCancel, playersNo} = state in
       (List.foldr (\a -> \b -> chooseCharacterForPlayer <| b)
-        (\s ->
-          case makeGameState s of
-            Ok gs -> contAccept gs s
-            Err () -> contCancel s
-        )
+        (\s -> contAccept (makeGameState s))
         (List.range 0 (playersNo-1))
       )
-      (State.GameSettings state)
+      state
     _ -> State.Error "Wrong message!"
 
 isValid settings =

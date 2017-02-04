@@ -4,7 +4,7 @@ import Character exposing (Character, CharacterContainer)
 
 type alias Player = Int
 
-type alias GameState =
+type alias State =
   {
     players : List Character,
     characters : CharacterContainer,

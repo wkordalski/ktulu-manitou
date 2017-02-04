@@ -3,7 +3,7 @@ module State exposing (..)
 import Color exposing (Color)
 
 import Character exposing (Character, CharacterContainer)
-import Game exposing (Player, GameState)
+import Game as G exposing (Player)
 import Faction exposing (Faction)
 
 import Html exposing (Html)
@@ -12,8 +12,8 @@ import Messages exposing (Msg)
 type alias GameSettingsData = {
     playersNo : Int,
 
-    contAccept : (GameState -> State -> State),
-    contCancel : (State -> State),
+    contAccept : (G.State -> State),
+    contCancel : (() -> State),
 
     gettingPlayers : Bool,
     players : List Character,
@@ -21,64 +21,44 @@ type alias GameSettingsData = {
   }
 
 type State
-  = Start
-  | PlayerChoosing
-    {
-      original : State,
-      choices : List Player,
-      firstDigit : Maybe Int,
-      secondDigit : Maybe Int,
-      continuation : Maybe Player -> State -> State,
-      title : String,
-      cancelEnabled : Bool,
-      parent : State
-    }
-  | Message -- text. and buttons horizontally, maby in few rows? (needs: styling)
+  = Start (DialogState ())
+  | Settings (DialogState GameSettingsData)
+  | Game (DialogState G.State)
+  | Error String
+
+type DialogState data
+  = MessageDialog -- text. and buttons horizontally, maby in few rows? (needs: styling)
     {
       text : Html Msg,
-      buttons : List (Html Msg, Color, (State->State)),
-      parent : State
+      buttons : List (Html Msg, (data->State)),
+      data : data
     }
-  | Menu -- text, and buttons vertically below
+  | MenuDialog -- text, and buttons vertically below
     {
       text : Html Msg,
-      buttons : List (Html Msg, Color, (State->State)),
-      parent : State
+      buttons : List (Html Msg, (data->State)),
+      data : data
     }
   | CharacterDialog
     {
       text : Html Msg,
-      characterDescriptor : Character -> State -> (Html Msg, Bool),
+      characterDescriptor : Character -> data -> (Html Msg, Bool),
       characters : List Character,
-      contAccept : Character -> State -> State,
-      contCancel : Maybe (State -> State),
+      contAccept : Character -> data -> State,
+      contCancel : Maybe (data -> State),
       faction : Maybe Faction,
       character : Maybe Character,
-      parent : State
+      data : data
     }
   | PlayerDialog
     {
       text : Html Msg,
-      playerDescriptor : Player -> State -> (Html Msg, Bool),
+      playerDescriptor : Player -> data -> (Html Msg, Bool),
       players : List Player,
-      contAccept : Player -> Action,
-      contCancel : Maybe Action,
+      contAccept : Player -> data -> State,
+      contCancel : Maybe (data -> State),
       digit1 : Maybe Int,
       digit2 : Maybe Int,
-      parent : State
+      data : data
     }
-  | GameSettings GameSettingsData
-  | PlayerSettings GameSettingsData
-  | Error String
-  | Game GameState
-  | Won Faction
-
-type alias Action = State -> State
-
-gameState state =
-  case state of
-    Game g -> Just g
-    Menu {parent} -> gameState parent
-    Message {parent} -> gameState parent
-    CharacterDialog {parent} -> gameState parent
-    _ -> Nothing
+  | GameSettings data
